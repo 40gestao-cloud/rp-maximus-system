@@ -1,17 +1,13 @@
-// ════════════════════════════════════════════════════════════
-//  firebase.js — Configuração do Firebase
-//  Substitua os valores abaixo pelos do seu projeto Firebase
-// ════════════════════════════════════════════════════════════
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey:            "SUA_API_KEY",
-  authDomain:        "SEU_PROJETO.firebaseapp.com",
-  projectId:         "SEU_PROJETO_ID",
-  storageBucket:     "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId:             "SEU_APP_ID",
+  apiKey: "AIzaSyAYLJ4-Gt-FZ0zU6Xp9Lx-UhrGGhGNTp8s",
+  authDomain: "gp-maximus.firebaseapp.com",
+  projectId: "gp-maximus",
+  storageBucket: "gp-maximus.firebasestorage.app",
+  messagingSenderId: "975233569379",
+  appId: "1:975233569379:web:0356e1af46d1f0aa1f9e56"
 };
 
 const app = initializeApp(firebaseConfig);
