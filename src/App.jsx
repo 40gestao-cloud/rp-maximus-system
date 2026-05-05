@@ -402,6 +402,32 @@ function LoginScreen({employees, onLogin}){
   const [email,setEmail]= useState("");
   const [err,  setErr]  = useState("");
 
+  // ── PWA Install prompt ──────────────────────────────────────
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+  const [showIOSHint,    setShowIOSHint]    = useState(false);
+
+  useEffect(()=>{
+    // Android/Chrome: captura o evento antes de suprimir
+    const handler = e => { e.preventDefault(); setDeferredPrompt(e); setShowInstallBtn(true); };
+    window.addEventListener("beforeinstallprompt", handler);
+
+    // iOS Safari: detecta se ainda não está instalado em standalone
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true;
+    if(isIOS && !isStandalone) setShowIOSHint(true);
+
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  },[]);
+
+  const handleInstall = async () => {
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if(outcome === "accepted") setShowInstallBtn(false);
+    setDeferredPrompt(null);
+  };
+
   const login = ()=>{
     setErr("");
     if(tab==="admin"){
@@ -455,6 +481,23 @@ function LoginScreen({employees, onLogin}){
 
         {err && <div className="err">{err}</div>}
         <button className="btn btn-gold btn-full mt3" onClick={login}>ENTRAR</button>
+
+        {/* Android: botão de instalação nativo */}
+        {showInstallBtn && (
+          <button className="btn btn-ghost btn-full" style={{marginTop:10}}
+            onClick={handleInstall}>
+            📲 Instalar App na Tela Inicial
+          </button>
+        )}
+
+        {/* iOS Safari: instrução manual */}
+        {showIOSHint && (
+          <div style={{marginTop:14,background:"rgba(79,142,247,.08)",border:"1px solid rgba(79,142,247,.25)",
+            borderRadius:10,padding:"12px 14px",fontSize:12,color:"var(--blue)",lineHeight:1.6}}>
+            <div style={{fontWeight:700,marginBottom:4}}>📲 Instalar no iPhone / iPad</div>
+            Toque em <strong>compartilhar</strong> (□↑) no Safari → <strong>"Adicionar à Tela de Início"</strong> para usar como app sem barra do navegador.
+          </div>
+        )}
       </div>
     </div>
   );
