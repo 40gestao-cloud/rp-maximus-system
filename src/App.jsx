@@ -408,20 +408,30 @@ function LoginScreen({employees, onLogin}){
   const [showIOSHint,    setShowIOSHint]    = useState(false);
 
   useEffect(()=>{
-    // Android/Chrome: captura o evento antes de suprimir
+    // Android/Chrome: captura o prompt nativo quando disponível
     const handler = e => { e.preventDefault(); setDeferredPrompt(e); setShowInstallBtn(true); };
     window.addEventListener("beforeinstallprompt", handler);
 
-    // iOS Safari: detecta se ainda não está instalado em standalone
+    // Detecta se já está instalado em standalone
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+      || window.navigator.standalone === true;
+
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isStandalone = window.navigator.standalone === true;
-    if(isIOS && !isStandalone) setShowIOSHint(true);
+
+    if(!isStandalone){
+      if(isIOS) setShowIOSHint(true);
+      else setShowInstallBtn(true); // força aparecer no Android mesmo sem o evento
+    }
 
     return () => window.removeEventListener("beforeinstallprompt", handler);
   },[]);
 
   const handleInstall = async () => {
-    if(!deferredPrompt) return;
+    if(!deferredPrompt){
+      // fallback: orienta manualmente caso o prompt nativo não esteja disponível
+      alert("Para instalar: toque no menu ⋮ do Chrome → 'Adicionar à tela inicial'");
+      return;
+    }
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if(outcome === "accepted") setShowInstallBtn(false);
